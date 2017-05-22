@@ -1,4 +1,4 @@
-# vue-sh-shifter
+# vue-shape-shifter
 
 > A Vue.js project based on shape-shifter
 
