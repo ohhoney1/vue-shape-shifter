@@ -21,10 +21,20 @@
             height: {
                 type: Number,
                 default: 600
+            },
+            fontSize: {
+                type: Number,
+                default: 200
+            },
+            time: {
+                type: Number,
+                default: 2000
             }
 		},
 		mounted () {
-            ShapeShifter(this.content, this.width, this.height)
+            
+            ShapeShifter(this.content, this.width, this.height, this.fontSize, this.time);
+
         }
 	}
 </script>
