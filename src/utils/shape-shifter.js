@@ -7,12 +7,13 @@
 'use strict';
 
 var S = {
-  init: function (content, width, height) {
+  init: function (content, width, height, fontSize, time) {
 
     S.Drawing.init('.canvas', width, height);
-    S.ShapeBuilder.init();
 
-    S.UI.simulate(content);
+    S.ShapeBuilder.init(fontSize);
+
+    S.UI.simulate(content, fontSize, time);
 
     S.Drawing.loop(function () {
       S.Shape.render();
@@ -133,9 +134,10 @@ S.UI = (function () {
   }
 
 
-  function performAction(value) {
+  function performAction(value, fontSize, time) {
     var action,
-        current;
+        current,
+        fontSize = fontSize;
 
     sequence = typeof(value) === 'object' ? value : sequence.concat(value.split('|'));
 
@@ -153,12 +155,12 @@ S.UI = (function () {
         timedAction(function (index) {
           if (index === 0) {
             if (sequence.length === 0) {
-              S.Shape.switchShape(S.ShapeBuilder.letter(''));
+              S.Shape.switchShape(S.ShapeBuilder.letter('', fontSize));
             } else {
               performAction(sequence);
             }
           } else {
-            S.Shape.switchShape(S.ShapeBuilder.letter(index), true);
+            S.Shape.switchShape(S.ShapeBuilder.letter(index, fontSize), true);
           }
         }, 3000, value, true);
         break;
@@ -180,13 +182,13 @@ S.UI = (function () {
         var t = formatTime(new Date());
 
         if (sequence.length > 0) {
-          S.Shape.switchShape(S.ShapeBuilder.letter(t));
+          S.Shape.switchShape(S.ShapeBuilder.letter(t, fontSize));
         } else {
           timedAction(function () {
             t = formatTime(new Date());
             if (t !== time) {
               time = t;
-              S.Shape.switchShape(S.ShapeBuilder.letter(time));
+              S.Shape.switchShape(S.ShapeBuilder.letter(time, fontSize));
             }
           }, 1000);
         }
@@ -194,14 +196,14 @@ S.UI = (function () {
 
 
       default:
-        S.Shape.switchShape(S.ShapeBuilder.letter(current[0] === cmd ? 'What?' : current));
+        S.Shape.switchShape(S.ShapeBuilder.letter(current[0] === cmd ? 'What?' : current, fontSize));
       }
-    }, 3000, sequence.length);
+    }, time, sequence.length);
   }
 
   return {
-    simulate: function (action) {
-      performAction(action);
+    simulate: function (action, fontSize, time) {
+      performAction(action, fontSize, time);
     }
   };
 }());
@@ -323,7 +325,6 @@ S.ShapeBuilder = (function () {
   var gap = 10,
       shapeCanvas = document.createElement('canvas'),
       shapeContext = shapeCanvas.getContext('2d'),
-      fontSize = 200,
       fontFamily = 'Avenir, Helvetica Neue, Helvetica, Arial, sans-serif';
 
   function fit() {
@@ -379,6 +380,7 @@ S.ShapeBuilder = (function () {
 
   return {
     init: function () {
+
       fit();
       window.addEventListener('resize', fit);
     },
@@ -394,10 +396,10 @@ S.ShapeBuilder = (function () {
       return processCanvas();
     },
 
-    letter: function (l) {
+    letter: function (l, fontSize) {
       var s = 0;
 
-      setFontSize(fontSize);
+      // setFontSize(fontSize);
       s = Math.min(fontSize,
                   (shapeCanvas.width / shapeContext.measureText(l).width) * 0.8 * fontSize, 
                   (shapeCanvas.height / fontSize) * (isNumber(l) ? 1 : 0.45) * fontSize);
